@@ -1,18 +1,16 @@
 import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:path/path.dart';
 import 'package:http/http.dart' as http;
 
 void main(List<String> arguments) async {
   var pen = AnsiPen()..magenta(bold: true);
   print(pen('\n-------------- SPDX XML License Parser --------------\n'));
 
-  /// Get the license file
+  /// Get the license as String
   var _licenseIdentifier = await getUserResponse();
-  var _xmlFile = await getLicenseFile(_licenseIdentifier);
-  var _xmlString = await _xmlFile.readAsString();
-
+  var _xmlString = await getLicense(_licenseIdentifier);
+  
   /// Preformat the xml string
   var _formattedString = preFormatXmlString(_xmlString);
 
@@ -40,12 +38,12 @@ Future<String> getUserResponse() async {
 }
 
 /// Get a license file based on the response got from user
-Future<File> getLicenseFile(String licenseIdentifier) async {
+Future<String> getLicense(String licenseIdentifier) async {
   final _url =
       'https://raw.githubusercontent.com/spdx/license-list-XML/master/src/$licenseIdentifier.xml';
   final _uri = Uri.parse(_url);
 
-  print('Fetching license file...');
+  print('Fetching license...');
   var _response = await http.get(_uri);
 
   if (_response.statusCode != 200) {
@@ -53,13 +51,8 @@ Future<File> getLicenseFile(String licenseIdentifier) async {
     return Future.error(_pen('Error: ${_response.body}\n'));
   }
 
-  print('License Fetched...\n');
-  var _xmlBytes = _response.bodyBytes;
-  var _filePath = join(dirname(Platform.script.toFilePath()), 'license.xml');
-  var _rawFile = File(_filePath);
-  var _xmlFile = await _rawFile.writeAsBytes(_xmlBytes);
-
-  return _xmlFile;
+  print('License fetched!\n');
+  return _response.body;
 }
 
 /// Print the license details viz name, spdx-identifier, osi approved license, deprecated.
