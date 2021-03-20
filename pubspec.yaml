@@ -1,0 +1,15 @@
+name: spdx_xml_parser
+description: A command line application to fetch an SPDX license and print its
+  details to the terminal.
+# version: 1.0.0
+# homepage: https://www.example.com
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  ansicolor: ^2.0.1
+  http: ^0.13.1
+  path: ^1.7.0
+
+dev_dependencies:
+  pedantic: ^1.10.0
