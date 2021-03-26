@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
 
 void main(List<String> arguments) async {
   var pen = AnsiPen()..magenta(bold: true);
