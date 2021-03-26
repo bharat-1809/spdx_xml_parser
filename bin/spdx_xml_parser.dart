@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
 
 void main(List<String> arguments) async {
   var pen = AnsiPen()..magenta(bold: true);
@@ -10,7 +11,7 @@ void main(List<String> arguments) async {
   /// Get the license as String
   var _licenseIdentifier = await getUserResponse();
   var _xmlString = await getLicense(_licenseIdentifier);
-  
+
   /// Preformat the xml string
   var _formattedString = preFormatXmlString(_xmlString);
 
@@ -19,8 +20,6 @@ void main(List<String> arguments) async {
 
   /// Format the xml string to remove unwanted tags
   var _stripedText = formatXmlString(_formattedString);
-  var _xmlTagsRegex = RegExp('<(.*?)>');
-  _stripedText = _stripedText.replaceAll(_xmlTagsRegex, '');
 
   /// Print the license text
   print(_stripedText);
@@ -61,14 +60,10 @@ void printLicenseDetails(String xmlString) {
   var valuePen = AnsiPen()..green(bold: true);
 
   var _licenseName = getLicenseDetails(xmlString: xmlString, regex: 'name="');
-  var _licenseId =
-      getLicenseDetails(xmlString: xmlString, regex: 'licenseId="');
-  var _isOsiApproved =
-      getLicenseDetails(xmlString: xmlString, regex: 'isOsiApproved="');
-  var _isDeprecated =
-      getLicenseDetails(xmlString: xmlString, regex: 'isDeprecated="');
-  var _deprecatedVersion =
-      getLicenseDetails(xmlString: xmlString, regex: 'deprecatedVersion="');
+  var _licenseId = getLicenseDetails(xmlString: xmlString, regex: 'licenseId="');
+  var _isOsiApproved = getLicenseDetails(xmlString: xmlString, regex: 'isOsiApproved="');
+  var _isDeprecated = getLicenseDetails(xmlString: xmlString, regex: 'isDeprecated="');
+  var _deprecatedVersion = getLicenseDetails(xmlString: xmlString, regex: 'deprecatedVersion="');
 
   print(keyPen('License name: ') + valuePen('$_licenseName'));
   print(keyPen('SPDX identifier: ') + valuePen('$_licenseId'));
@@ -103,13 +98,13 @@ String? getLicenseDetails({required String xmlString, required String regex}) {
 String preFormatXmlString(String xmlString) {
   var _formattedString = xmlString;
 
-  var _gtSymbolRegex = RegExp('&gt;');
-  _formattedString = _formattedString.replaceAll(_gtSymbolRegex, '');
+  var _gtSymbolRegex = RegExp(r'&gt;');
+  _formattedString = _formattedString.replaceAll(_gtSymbolRegex, '>');
 
-  var _ltSymbolRegex = RegExp('&lt;');
-  _formattedString = _formattedString.replaceAll(_ltSymbolRegex, '');
+  var _ltSymbolRegex = RegExp(r'&lt;');
+  _formattedString = _formattedString.replaceAll(_ltSymbolRegex, '<');
 
-  var _quoteSymbolRegex = RegExp('&#34;');
+  var _quoteSymbolRegex = RegExp(r'&#34;');
   _formattedString = _formattedString.replaceAll(_quoteSymbolRegex, "'");
 
   return _formattedString;
@@ -119,45 +114,50 @@ String preFormatXmlString(String xmlString) {
 /// Tags that are removed: bullet, license, obsoletedBy, crossRef
 String formatXmlString(String xmlString) {
   var _formattedString = xmlString;
+  var _tempString = '';
+  List<String> _stringList;
 
   /// Handle the <bullet> tag
-  var _bulletEndRegex = RegExp('<\/bullet>\n');
-  var _splittedString = _formattedString.split(_bulletEndRegex);
-  var _tempString = '';
-  for (var str in _splittedString) {
-    _tempString += str.trim();
+  var _bulletEndRegex = RegExp('</bullet>\n');
+  _stringList = _formattedString.split(_bulletEndRegex);
+  for (var str in _stringList) {
+    _tempString += (str.trim());
   }
   _formattedString = _tempString;
 
-  /// Remove the <license> tag
-  if (_formattedString.contains(RegExp('<license'))) {
-    var _licenseTagRegex = RegExp('((<license(.*)\n  )(.*)\n  )(.*)\n');
-    _formattedString = _formattedString.replaceAll(_licenseTagRegex, '');
-  }
+  /// Remove the <license> tag and contents
+  var _licenseTagRegex = RegExp('((<license(.*)\n )(.*)\n )(.*)\n');
+  _formattedString = _formattedString.replaceAll(_licenseTagRegex, '');
 
-  /// Remove the <obsoletedBy> tag
-  if (_formattedString.contains(RegExp('<obsoletedBy'))) {
-    var _obsoletedTagRegex = RegExp('<obsoletedBy(.*)');
-    var _splitString = _formattedString.split(_obsoletedTagRegex);
+  /// Remove the <obsoletedBy> tag and contents
+  var _obsoletedTagRegex = RegExp('<obsoletedBy(.*)');
+  _formattedString = _formattedString.replaceAll(_obsoletedTagRegex, '');
 
-    var _tempStr = '';
-    for (var str in _splitString) {
-      _tempStr += str.trim();
+  /// Remove the <crossRef> tag and contents
+  var _crossRefTagRegex = RegExp('<crossRef(.*)');
+  _formattedString = _formattedString.replaceAll(_crossRefTagRegex, '');
+
+  /// Remove the <crossRef> tag and contents
+  var _notesTagRegex = RegExp('<notes(.*)');
+  _formattedString = _formattedString.replaceAll(_notesTagRegex, '');
+
+  var _paraTagRegex = RegExp(r'</p>');
+  _formattedString = _formattedString.replaceAll(_paraTagRegex, '\n ');
+
+  /// Remove all tags
+  var _xmlTagsRegex = RegExp('<(.*?)>');
+  _formattedString = _formattedString.replaceAll(_xmlTagsRegex, '');
+
+  /// Remove unwanted white spaces
+  var _unwantedSpacesRegex = RegExp(r'\n|\t');
+  _stringList = _formattedString.split(_unwantedSpacesRegex);
+  _tempString = '';
+  var _charRegex = RegExp('[A-Z]|[a-z]|[0-9]|^ {1}', multiLine: true);
+  for (var str in _stringList) {
+    if (_charRegex.hasMatch(str)) {
+      _tempString += (str.trim() + '\n');
     }
-    _formattedString = _tempStr;
   }
-
-  /// Remove the <crossRef> tag
-  if (_formattedString.contains(RegExp('<crossRef'))) {
-    var _crossRefTagRegex = RegExp('<crossRef(.*)');
-    var _splitString = _formattedString.split(_crossRefTagRegex);
-
-    var _tempStr = '';
-    for (var str in _splitString) {
-      _tempStr += str.trim();
-    }
-    _formattedString = _tempStr;
-  }
-
+  _formattedString = _tempString;
   return _formattedString;
 }
