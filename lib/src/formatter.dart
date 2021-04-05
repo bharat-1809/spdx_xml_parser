@@ -48,7 +48,7 @@ final _paraTagRegex = RegExp(r'</p>');
 final _otherXmlTagsRegex = RegExp('<(.*?)>');
 
 // Regex for normalizing white spaces
-final _unwantedSpacesRegex = RegExp(r'\n|\t');
+final _unwantedSpacesRegex = RegExp('\n');
 final _unwantedSpaceConditionRegex = RegExp('[A-Z]|[a-z]|[0-9]|^ {1}', multiLine: true);
 
 /// Normalize the tag or symbol in the text that matches the pattern.
