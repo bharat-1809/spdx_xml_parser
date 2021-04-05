@@ -5,22 +5,45 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  
+  workflow_dispatch:
 
 jobs:
-  lint-test:
+  analyze:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Repository
         uses: actions/checkout@v2
-      
+
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
-
+        with:
+          channel: beta
+      
       - name: Install Dependencies
         run: dart pub get
 
       - name: Verify Formatting 
         run: dart format --output=none --set-exit-if-changed .
 
-      - name: Analyze
+      - name: Analyze code
         run: dart analyze
+  test:
+    needs: analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dart-lang/setup-dart@v1
+        with:
+          channel: beta
+      
+      - name: Install dependencies
+        run: dart pub get
+      
+      - name: Run tests and collect coverage
+        run: ./test.sh
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v1
+        with:
+          file: coverage/lcov.info
