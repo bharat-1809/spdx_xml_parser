@@ -36,6 +36,7 @@ void printLicenseDetails(String xmlString) {
     print(keyPen('Is deprecated: ') + valuePen('$isDeprecated'));
     print(keyPen('Deprecated version: ') + valuePen('$deprecatedVersion'));
   }
+  print('\n');
 }
 
 final _spdxMasterFileUrl = 'https://raw.githubusercontent.com/spdx/license-list-XML/master/src';

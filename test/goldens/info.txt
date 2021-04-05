@@ -1,0 +1,7 @@
+
+-------------- SPDX XML License Parser --------------
+
+Enter an SPDX license identifier to fetch the license:
+Like 0BSD, Apache-2.0 or MIT, etc (Case Sensitive)
+
+Fetching license...

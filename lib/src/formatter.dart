@@ -15,17 +15,20 @@ String formatString(String xmlString) {
   var str = _removeSplitJoin(text: xmlString, pattern: _bulletEndRegex);
 
   // Remove the corresponding tags
-  str = _normalizeTagOrSymbol(text: str, pattern: _licenseTagRegex, replacement: '');
+  // The content of the following tags also neeed to be removed hence separate regex
   str = _normalizeTagOrSymbol(text: str, pattern: _obsoletedTagRegex, replacement: '');
   str = _normalizeTagOrSymbol(text: str, pattern: _crossRefTagRegex, replacement: '');
   str = _normalizeTagOrSymbol(text: str, pattern: _notesTagRegex, replacement: '');
+
+  // Remove all other tags
+  str = _normalizeTagOrSymbol(text: str, pattern: _itemEndRegex, replacement: '\n \n');
   str = _normalizeTagOrSymbol(text: str, pattern: _paraTagRegex, replacement: '\n ');
   str = _normalizeTagOrSymbol(text: str, pattern: _otherXmlTagsRegex, replacement: '');
 
   // Remove the extraneous spaces, skipping the required ones like the new line after each para
   str = _removeSplitJoin(
     text: str,
-    pattern: _unwantedSpacesRegex,
+    pattern: _lineBreaks,
     joinAddOn: '\n',
     joinIfRegex: _unwantedSpaceConditionRegex,
   );
@@ -39,17 +42,17 @@ final _ltSymbolRegex = RegExp(r'&lt;');
 final _quoteSymbolRegex = RegExp(r'&#34;');
 
 // Regex for normalizing tags
-final _bulletEndRegex = RegExp('</bullet>\n');
-final _licenseTagRegex = RegExp('((<license(.*)\n )(.*)\n )(.*)\n');
+final _itemEndRegex = RegExp(r'</item>');
+final _bulletEndRegex = RegExp(r'</bullet>\n');
 final _obsoletedTagRegex = RegExp('<obsoletedBy(.*)');
 final _crossRefTagRegex = RegExp('<crossRef(.*)');
-final _notesTagRegex = RegExp('<notes(.*)');
+final _notesTagRegex = RegExp(r'<notes>([\S\s]*?)<\/notes>');
 final _paraTagRegex = RegExp(r'</p>');
-final _otherXmlTagsRegex = RegExp('<(.*?)>');
+final _otherXmlTagsRegex = RegExp(r'<([\S\s]*?)>');
 
 // Regex for normalizing white spaces
-final _unwantedSpacesRegex = RegExp('\n');
-final _unwantedSpaceConditionRegex = RegExp('[A-Z]|[a-z]|[0-9]|^ {1}', multiLine: true);
+final _lineBreaks = RegExp('\n');
+final _unwantedSpaceConditionRegex = RegExp(r'[\S]|^ $', multiLine: true);
 
 /// Normalize the tag or symbol in the text that matches the pattern.
 String _normalizeTagOrSymbol(
