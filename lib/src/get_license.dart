@@ -23,11 +23,11 @@ void printLicenseDetails(String xmlString) {
   var keyPen = AnsiPen()..yellow();
   var valuePen = AnsiPen()..green(bold: true);
 
-  var licenseName = _getLicenseDetails(xmlString: xmlString, regex: 'name="');
-  var licenseId = _getLicenseDetails(xmlString: xmlString, regex: 'licenseId="');
-  var isOsiApproved = _getLicenseDetails(xmlString: xmlString, regex: 'isOsiApproved="');
-  var isDeprecated = _getLicenseDetails(xmlString: xmlString, regex: 'isDeprecated="');
-  var deprecatedVersion = _getLicenseDetails(xmlString: xmlString, regex: 'deprecatedVersion="');
+  var licenseName = _getLicenseDetails(xmlString: xmlString, propertyName: 'name');
+  var licenseId = _getLicenseDetails(xmlString: xmlString, propertyName: 'licenseId');
+  var isOsiApproved = _getLicenseDetails(xmlString: xmlString, propertyName: 'isOsiApproved');
+  var isDeprecated = _getLicenseDetails(xmlString: xmlString, propertyName: 'isDeprecated');
+  var deprecatedVersion = _getLicenseDetails(xmlString: xmlString, propertyName: 'deprecatedVersion');
 
   print(keyPen('License name: ') + valuePen('$licenseName'));
   print(keyPen('SPDX identifier: ') + valuePen('$licenseId'));
@@ -42,21 +42,9 @@ void printLicenseDetails(String xmlString) {
 final _spdxMasterFileUrl = 'https://raw.githubusercontent.com/spdx/license-list-XML/master/src';
 
 /// Get license details using regex
-String? _getLicenseDetails({required String xmlString, required String regex}) {
-  var detailRegex = RegExp('$regex');
-  var detailIndex = xmlString.indexOf(detailRegex);
-
-  if (detailIndex == -1) return null;
-  detailIndex += regex.length;
-
-  var detail = '';
-  var currentChar = xmlString[detailIndex];
-
-  while (currentChar != '"') {
-    detail += currentChar;
-    detailIndex += 1;
-    currentChar = xmlString[detailIndex];
-  }
+String? _getLicenseDetails({required String xmlString, required String propertyName}) {
+  var detailRegex = RegExp('(?<=$propertyName=")(.*?)(?=")');
+  var detail = detailRegex.stringMatch(xmlString);
 
   return detail;
 }
