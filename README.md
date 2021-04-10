@@ -6,14 +6,28 @@
 
 Fetches the license using the identifier entered by the user. Prints the license details to the terminal and the licene itself
 
+## Working
+
+- Fetches the license from the SPDX master list.
+- Gets the license details like name, isOSiAprroved, and isDeprecated.
+- Normalize the license:
+    - Replace symbol codes with literal symbols.
+    - Remove xml tags/nodes
+    - Remove extraneous white spaces
+- Prints the normalized license text
+
 ## Usage
 
-- For Linux/ MacOS:<br>
-```./spdx_parser.sh```
+- For Linux/ MacOS:&nbsp;```./spdx_parser.sh```
 
-- For Win or if the above command doesn't work:<br>
-```dart run```
+- For Win or if the above command doesn't work:&nbsp;```dart run```
+
+## Test
+
+- For running tests:&nbsp;```dart test```
+
+- For generating coverage report:&nbsp;```./test.sh```
 
 ## Demo
 
-<img src="https://raw.githubusercontent.com/bharat-1809/spdx_xml_parser/master/spdx_parser.gif">
+<img src="https://raw.githubusercontent.com/bharat-1809/spdx_xml_parser/main/spdx_parser.gif">
