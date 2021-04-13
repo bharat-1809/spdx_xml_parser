@@ -30,4 +30,4 @@ Fetches the license using the identifier entered by the user. Prints the license
 
 ## Demo
 
-<img src="https://raw.githubusercontent.com/bharat-1809/spdx_xml_parser/main/spdx_parser.gif">
+<img src="https://raw.githubusercontent.com/bharat-1809/spdx_xml_parser/main/spdx_parser_demo.gif">
